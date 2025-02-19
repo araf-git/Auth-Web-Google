@@ -9,7 +9,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "http://localhost:8080/auth/google/callback", //backend callback
+      callbackURL: "https://auth-web-google.vercel.app/auth/google/callback", //backend callback
     },
     async (access_token, refresh_token, profile, done) => {
       // console.log("Profile", profile);
