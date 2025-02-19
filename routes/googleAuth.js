@@ -31,7 +31,8 @@ router
 
 
       // Successful authentication, redirect home.
-      res.redirect(`${process.env.HOST}/redirect/${access_token}`);
+      // res.redirect(`${process.env.HOST}/redirect/${access_token}`);
+      res.redirect(`https:/auth-web-google.vercel.app/redirect/${access_token}`);
     }
   );
 
