@@ -319,7 +319,7 @@ export const passwordReset = async (req, res) => {
   
   // Joi validation schema
   const schema = Joi.object({
-    // id: Joi.string().length(24).hex().required(),  // MongoDB ObjectId validation
+    id: Joi.string().length(24).hex().required(),  // MongoDB ObjectId validation
     password: Joi.string()
       .min(6)
       .max(30)
@@ -329,8 +329,8 @@ export const passwordReset = async (req, res) => {
   });
 
   // Validate the parameters
-  // const { error } = schema.validate({ id, password, reset_token });
-  const { error } = schema.validate({ password, reset_token });
+  const { error } = schema.validate({ id, password, reset_token });
+  // const { error } = schema.validate({ password, reset_token });
 
   if (error) {
     return res.status(400).json({ message: error.details[0].message });
