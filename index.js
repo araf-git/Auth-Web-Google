@@ -23,7 +23,7 @@ const server = express();
 //   credentials: true, // Allow cookies to be sent and received
 // };
 
-server.use(express.static(path.resolve('build')));
+server.use(express.static(path.resolve("build")));
 // server.use(cors(corsOptions));
 // server.use(cors());
 server.use(cookieParser());

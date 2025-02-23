@@ -55,11 +55,19 @@
       "dest": "build/index.html"
     },
     {
-      "src": "/redirect",
+      "src": "/reset-password",
       "dest": "build/index.html"
     },
     {
-      "src": "/redirect/(.*)",
+      "src": "/reset-password/(.*)",
+      "dest": "build/index.html"
+    },
+    {
+      "src": "/verify-email",
+      "dest": "build/index.html"
+    },
+    {
+      "src": "/verify-email/(.*)",
       "dest": "build/index.html"
     },
     {

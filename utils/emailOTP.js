@@ -11,7 +11,7 @@ const OTP = async (user) => {
 
   //  OTP Verification Link
   const otpVerificationLink = `localhost:3000/auth/verify-email`;
-  console.log(otpVerificationLink)
+  console.log(otpVerificationLink);
   await transporter.sendMail({
     from: process.env.EMAIL_FROM,
     to: user.email,

@@ -31,8 +31,7 @@ router
 
 
       // Successful authentication, redirect home.
-      // res.redirect(`${process.env.HOST}/redirect/${access_token}`);
-      res.redirect(`/redirect/${access_token}`);
+      res.redirect(`${process.env.HOST}/redirect/${access_token}`);
     }
   );
 

@@ -51,7 +51,7 @@ export const signUp = async (req, res) => {
       const doc = await newUser.save();
 
       // console.log(doc);
-      OTP(doc);
+      await OTP(doc);
       return res.status(201).json({
         message: "Registration Successful. Check Your Email for OTP",
       });
@@ -85,10 +85,10 @@ export const verifyEmail = async (req, res) => {
   }
 
   const { email, otp } = req.body;
-  console.log(req.body);
+
   try {
     const existingUser = await User.findOne({ email });
-    console.log(existingUser);
+
     // Check if email doesn't exists
     if (!existingUser) {
       return res
@@ -103,18 +103,16 @@ export const verifyEmail = async (req, res) => {
         .json({ status: "failed", message: "Email is already verified" });
     }
 
-    // Check if the form OTP matches the database OTP
-    const emailVerification = await EmailVerification.findOne({
+    // Check if the user sent OTP matches the database OTP
+    const otpDocument = await EmailVerification.findOne({
       userId: existingUser._id,
       otp,
     });
-    console.log("hello", emailVerification);
 
     // if no otp found in database give user a new otp
-    if (!emailVerification) {
+    if (!otpDocument) {
       if (!existingUser.verified) {
-        // console.log(existingUser);
-        await OTP(req, existingUser);
+        await OTP(existingUser);
         return res.status(400).json({
           status: "failed",
           message: "Invalid OTP, new OTP sent to your email",
@@ -123,33 +121,26 @@ export const verifyEmail = async (req, res) => {
       return res.status(400).json({ status: "failed", message: "Invalid OTP" });
     }
 
-    // Check if OTP is expired
-    const currentTime = new Date();
-    // 15 * 60 * 1000 calculates the expiration period in milliseconds(15 minutes).
-    const expirationTime = new Date(
-      emailVerification.createdAt.getTime() + 15 * 60 * 1000
-    );
-    if (currentTime > expirationTime) {
-      // OTP expired, send new OTP
-      await OTP(req, existingUser);
-      return res.status(400).json({
-        status: "failed",
-        message: "OTP expired, new OTP sent to your email",
-      });
-    }
+    // If no OTP is found (if (!otpDocument)):
+    // First, check if the user is verified (if (!existingUser.verified)):
+    // If the user is not verified, generate a new OTP and send it to the user.
+    // If the user is already verified, simply return an "Invalid OTP" message because no OTP should be needed for a verified user.
+
+    // TTL handles expiration automatically, so no need for manual checks. 🚀
+    // createdAt: { type: Date, default: Date.now, expires: "15m" },
+
 
     // OTP is valid and not expired, mark email as verified
     existingUser.verified = true;
     await existingUser.save();
 
-    // Delete email verification document
+    // Delete otp verification document
     await EmailVerification.deleteMany({ userId: existingUser._id });
     return res.status(200).json({
       status: "success",
       message: "Email verified successfully. Please Login",
     });
   } catch (error) {
-    // console.error(error);
     res.status(500).json({
       status: "failed",
       message: "Unable to verify email, please try again later",
@@ -177,7 +168,7 @@ export const login = async (req, res) => {
   try {
     if (email && password) {
       const user = await User.findOne({ email });
-      // console.log(user)
+
       if (!user) {
         return res.status(400).json({ message: "User not registered" });
       }
@@ -193,7 +184,6 @@ export const login = async (req, res) => {
       }
 
       const { access_token, refresh_token } = await generateTokens(user);
-      // console.log(access_token, refresh_token);
 
       setCookie(res, refresh_token);
 
@@ -218,7 +208,8 @@ export const userInfo = async (req, res) => {
   try {
     const user = await User.findById(userID).select(
       "-password -updatedAt -__v"
-    ); // Fetch user without password
+    ); 
+    // Fetch user without password
     // console.log(user)
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -264,7 +255,6 @@ export const changePassword = async (req, res) => {
       message: "Password changed successfully",
     });
   } catch (error) {
-    console.error(error);
     return res.status(500).json({
       message: "Unable to change password",
     });
@@ -294,15 +284,15 @@ export const sendPasswordResetEmail = async (req, res) => {
         .status(404)
         .json({ message: "No User Found Using This Email" });
     }
-    // console.log(user);
-    // console.log(process.env.JWT_RESET_KEY);
+
     const secret = user._id + process.env.JWT_RESET_KEY;
-    // console.log(secret);
+    
     const reset_token = jwt.sign({ userID: user._id }, secret, {
       expiresIn: "5m",
     });
+
     const link = `${process.env.HOST}/reset-password/${user._id}/${reset_token}`;
-    console.log(link);
+    // console.log(link);
 
     // Uncomment to send email in production
     await transporter.sendMail({
@@ -316,7 +306,6 @@ export const sendPasswordResetEmail = async (req, res) => {
       message: "Password Reset Email Sent... Please Check Your Email",
     });
   } catch (error) {
-    // console.error(error);
     return res.status(500).json({
       message: "Unable to send password reset email",
     });
@@ -326,7 +315,8 @@ export const sendPasswordResetEmail = async (req, res) => {
 export const passwordReset = async (req, res) => {
   const { password } = req.body;
   const { id, reset_token } = req.params;
-  console.log(password, id, reset_token);
+  // console.log(password, id, reset_token);
+  
   // Joi validation schema
   const schema = Joi.object({
     // id: Joi.string().length(24).hex().required(),  // MongoDB ObjectId validation
