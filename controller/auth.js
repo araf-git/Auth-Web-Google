@@ -292,7 +292,7 @@ export const sendPasswordResetEmail = async (req, res) => {
     });
 
     const link = `${process.env.HOST}/reset-password/${user._id}/${reset_token}`;
-    // console.log(link);
+    console.log(link);
 
     // Uncomment to send email in production
     await transporter.sendMail({
